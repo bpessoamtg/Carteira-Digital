@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: #0a0a0f;
+  color: #f0f0f8;
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* Number inputs */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  opacity: 0.4;
+}
+
+/* Date inputs */
+input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(0.6);
+  cursor: pointer;
+}
+
+/* Select dropdown arrow */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238888aa' stroke-width='2' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px !important;
+}
+
+/* Recharts */
+.recharts-default-tooltip {
+  background: #13131f !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  border-radius: 10px !important;
+}
+
+/* Mobile navigation */
+@media (max-width: 767px) {
+  .hidden.md\:flex { display: none !important; }
+  .flex.md\:hidden { display: flex !important; }
+}
+@media (min-width: 768px) {
+  .hidden.md\:flex { display: flex !important; }
+  .flex.md\:hidden { display: none !important; }
+}
