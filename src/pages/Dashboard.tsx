@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import {
   PieChart, Pie, Cell, Tooltip,
@@ -54,7 +54,7 @@ function StatCard({
   )
 }
 
-const TOOLTIP_STYLE: React.CSSProperties = {
+const TOOLTIP_STYLE: CSSProperties = {
   background: '#13131f',
   border: '1px solid rgba(255,255,255,0.1)',
   borderRadius: '10px',
@@ -145,12 +145,19 @@ export function Dashboard() {
   [posicoes])
 
   const topGanhadores = useMemo(() =>
-    [...posicoes].sort((a, b) => plPercentagem(b) - plPercentagem(a)).slice(0, 3),
+    [...posicoes]
+      .filter((p) => plPercentagem(p) > 0)
+      .sort((a, b) => plPercentagem(b) - plPercentagem(a))
+      .slice(0, 3),
   [posicoes])
 
-  const topPerdedores = useMemo(() =>
-    [...posicoes].sort((a, b) => plPercentagem(a) - plPercentagem(b)).slice(0, 3),
-  [posicoes])
+  const topPerdedores = useMemo(() => {
+    const ganhadoresIds = new Set(topGanhadores.map((p) => p.id))
+    return [...posicoes]
+      .filter((p) => plPercentagem(p) < 0 && !ganhadoresIds.has(p.id))
+      .sort((a, b) => plPercentagem(a) - plPercentagem(b))
+      .slice(0, 3)
+  }, [posicoes, topGanhadores])
 
   // Chart data
   const dadosCorretora = corretoras
@@ -410,12 +417,12 @@ export function Dashboard() {
               ))}
             </div>
           )}
-          {topPerdedores.filter((p) => plPercentagem(p) < 0).length > 0 && (
+          {topPerdedores.length > 0 && (
             <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: '14px', padding: '16px 18px' }}>
               <h4 style={{ fontFamily: 'Syne, sans-serif', fontSize: '12px', fontWeight: 700, color: C.red, marginBottom: '12px', letterSpacing: '0.06em' }}>
                 ↓ TOP PERDAS
               </h4>
-              {topPerdedores.filter((p) => plPercentagem(p) < 0).map((p) => (
+              {topPerdedores.map((p) => (
                 <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <div style={{ fontWeight: 600, fontSize: '13px', color: C.text }}>{p.ticker}</div>
                   <div style={{ fontSize: '13px', fontWeight: 700, color: C.red }}>{formatarPercentagem(plPercentagem(p))}</div>

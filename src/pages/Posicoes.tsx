@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { TIPOS_ATIVO, REGIOES, MOEDAS, type TipoAtivo, type Moeda, type Regiao, type Posicao } from '../types'
 import { Modal } from '../components/Modal'
@@ -222,9 +223,9 @@ export function Posicoes() {
               <p style={{ color: C.muted, marginBottom: '16px' }}>
                 Adiciona primeiro uma corretora antes de adicionar posições.
               </p>
-              <a href="/corretoras" style={{ color: C.blue, textDecoration: 'none', fontWeight: 600 }}>
+              <Link to="/corretoras" style={{ color: C.blue, textDecoration: 'none', fontWeight: 600 }}>
                 Ir para Corretoras →
-              </a>
+              </Link>
             </>
           ) : (
             <>
@@ -237,6 +238,19 @@ export function Posicoes() {
               </button>
             </>
           )}
+        </div>
+      )}
+
+      {/* Empty filter state */}
+      {posicoes.length > 0 && posicoesFiltradas.length === 0 && (
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: '16px', padding: '48px 32px', textAlign: 'center' }}>
+          <p style={{ color: C.muted, fontSize: '13px' }}>Nenhuma posição para os filtros seleccionados.</p>
+          <button
+            onClick={() => { setFiltroCorretora('todas'); setFiltroTipo('todos') }}
+            style={{ marginTop: '12px', background: 'none', border: 'none', color: C.blue, cursor: 'pointer', fontSize: '13px', fontWeight: 500 }}
+          >
+            Limpar filtros
+          </button>
         </div>
       )}
 

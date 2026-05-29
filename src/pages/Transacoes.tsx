@@ -249,6 +249,19 @@ export function Transacoes() {
         </div>
       )}
 
+      {/* Empty filter state */}
+      {transacoes.length > 0 && transacoesFiltradas.length === 0 && (
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: '16px', padding: '48px 32px', textAlign: 'center' }}>
+          <p style={{ color: C.muted, fontSize: '13px' }}>Nenhuma transação para os filtros seleccionados.</p>
+          <button
+            onClick={() => { setFiltroCorretora('todas'); setFiltroTipo('todos') }}
+            style={{ marginTop: '12px', background: 'none', border: 'none', color: C.blue, cursor: 'pointer', fontSize: '13px', fontWeight: 500 }}
+          >
+            Limpar filtros
+          </button>
+        </div>
+      )}
+
       {/* Table */}
       {transacoesFiltradas.length > 0 && (
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: '16px', overflow: 'hidden' }}>
@@ -456,7 +469,11 @@ export function Transacoes() {
             }}>
               <span style={{ fontSize: '12px', color: C.muted }}>Valor estimado</span>
               <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '14px', fontWeight: 700, color: C.blue }}>
-                {formatarMoeda(parseFloat(form.quantidade || '0') * parseFloat(form.preco || '0') + parseFloat(form.comissao || '0'))}
+                {formatarMoeda(
+                  form.tipo === 'compra'
+                    ? parseFloat(form.quantidade || '0') * parseFloat(form.preco || '0') + parseFloat(form.comissao || '0')
+                    : parseFloat(form.quantidade || '0') * parseFloat(form.preco || '0') - parseFloat(form.comissao || '0')
+                )}
               </span>
             </div>
           )}
