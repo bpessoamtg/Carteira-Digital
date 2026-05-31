@@ -53,12 +53,16 @@ export function Posicoes() {
   const [filtroTipo, setFiltroTipo]     = useState<TipoAtivo | 'todos'>('todos')
   const [ordem, setOrdem]               = useState<'valor' | 'pl' | 'hoje' | 'ticker'>('valor')
 
-  // Live price state
+  // Live price state (table)
   const [cotacoes,    setCotacoes]    = useState<Record<string, Cotacao>>({})
   const [aFetch,      setAFetch]      = useState(false)
   const [erroFetch,   setErroFetch]   = useState('')
   const [ultimaAtu,   setUltimaAtu]   = useState<Date | null>(null)
   const [semCors,     setSemCors]     = useState<string[]>([])
+
+  // Live price state (modal)
+  const [fetchingModal, setFetchingModal] = useState(false)
+  const [erroModal,     setErroModal]     = useState('')
 
   const posicoesFiltradas = useMemo(() => {
     let lista = [...posicoes]
@@ -96,10 +100,31 @@ export function Posicoes() {
     }
   }, [posicoes, atualizarPrecos])
 
+  async function buscarPrecoModal(ticker: string) {
+    const t = ticker.trim().toUpperCase()
+    if (!t) return
+    setFetchingModal(true)
+    setErroModal('')
+    try {
+      const res = await fetchCotacoes([t])
+      if (res[t]) {
+        setForm((prev) => ({ ...prev, precoAtual: String(res[t].precoAtual) }))
+        setErros((e) => ({ ...e, precoAtual: undefined }))
+      } else {
+        setErroModal(`Sem cotação para "${t}" no Yahoo Finance`)
+      }
+    } catch {
+      setErroModal('Erro ao obter cotação')
+    } finally {
+      setFetchingModal(false)
+    }
+  }
+
   function abrirNovo() {
     setEditando(null)
     setForm({ ...FORM_VAZIO, corretoraId: corretoras[0]?.id ?? '' })
     setErros({})
+    setErroModal('')
     setModalAberto(true)
   }
 
@@ -112,7 +137,10 @@ export function Posicoes() {
       moeda: p.moeda, regiao: p.regiao,
     })
     setErros({})
+    setErroModal('')
     setModalAberto(true)
+    // Auto-fetch latest price
+    buscarPrecoModal(p.ticker)
   }
 
   function fecharModal() { setModalAberto(false); setEditando(null) }
@@ -439,7 +467,11 @@ export function Posicoes() {
               <input type="text" value={form.ticker} onChange={(e) => f('ticker', e.target.value)}
                 placeholder="Ex: IWDA.AS, SXR8.DE, BTC-EUR"
                 style={erros.ticker ? { ...INPUT_STYLE, borderColor: 'rgba(239,68,68,0.5)' } : INPUT_STYLE}
-                onFocus={focusInput} onBlur={(e) => blurInput(e, erros.ticker)} />
+                onFocus={focusInput}
+                onBlur={(e) => {
+                  blurInput(e, erros.ticker)
+                  if (form.ticker.trim()) buscarPrecoModal(form.ticker)
+                }} />
             </FormField>
             <FormField label="Nome do Ativo" erro={erros.nome}>
               <input type="text" value={form.nome} onChange={(e) => f('nome', e.target.value)}
@@ -475,10 +507,42 @@ export function Posicoes() {
                 onFocus={focusInput} onBlur={(e) => blurInput(e, erros.precoMedioCusto)} />
             </FormField>
             <FormField label="Preço Atual" erro={erros.precoAtual}>
-              <input type="number" value={form.precoAtual} onChange={(e) => f('precoAtual', e.target.value)}
-                placeholder="0.00" min="0" step="any"
-                style={erros.precoAtual ? { ...INPUT_STYLE, borderColor: 'rgba(239,68,68,0.5)' } : INPUT_STYLE}
-                onFocus={focusInput} onBlur={(e) => blurInput(e, erros.precoAtual)} />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="number" value={form.precoAtual}
+                  onChange={(e) => f('precoAtual', e.target.value)}
+                  placeholder={fetchingModal ? 'A obter cotação…' : '0.00'}
+                  min="0" step="any"
+                  disabled={fetchingModal}
+                  style={{
+                    ...(erros.precoAtual ? { ...INPUT_STYLE, borderColor: 'rgba(239,68,68,0.5)' } : INPUT_STYLE),
+                    paddingRight: '38px',
+                    opacity: fetchingModal ? 0.5 : 1,
+                  }}
+                  onFocus={focusInput} onBlur={(e) => blurInput(e, erros.precoAtual)}
+                />
+                <button
+                  type="button"
+                  onClick={() => buscarPrecoModal(form.ticker)}
+                  disabled={fetchingModal || !form.ticker.trim()}
+                  title="Obter cotação atual"
+                  style={{
+                    position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', cursor: fetchingModal || !form.ticker.trim() ? 'default' : 'pointer',
+                    color: fetchingModal ? C.muted : C.blue, padding: '4px', borderRadius: '4px',
+                    display: 'flex', alignItems: 'center',
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
+                    style={{ animation: fetchingModal ? 'spin 0.8s linear infinite' : 'none' }}>
+                    <path d="M23 4v6h-6M1 20v-6h6" />
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                  </svg>
+                </button>
+              </div>
+              {erroModal && (
+                <p style={{ color: '#f59e0b', fontSize: '11px', marginTop: '4px' }}>{erroModal}</p>
+              )}
             </FormField>
           </div>
           <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
