@@ -7,7 +7,8 @@ import { Transacoes } from './pages/Transacoes'
 
 export function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/ponto-digital">
+
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Dashboard />} />
