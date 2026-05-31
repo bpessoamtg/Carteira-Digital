@@ -24,6 +24,8 @@ interface Store {
     novasTransacoes: Omit<Transacao, 'id' | 'criadaEm'>[],
     mapaTickerParaId: Record<string, string>
   ) => void
+
+  atualizarPrecos: (precos: Record<string, number>) => void
 }
 
 function gerarId(): string {
@@ -99,6 +101,15 @@ export const useStore = create<Store>()(
       removerTransacao: (id) =>
         set((s) => ({
           transacoes: s.transacoes.filter((t) => t.id !== id),
+        })),
+
+      atualizarPrecos: (precos) =>
+        set((s) => ({
+          posicoes: s.posicoes.map((p) =>
+            precos[p.ticker] !== undefined
+              ? { ...p, precoAtual: precos[p.ticker], atualizadaEm: new Date().toISOString() }
+              : p
+          ),
         })),
 
       importarEmMassa: (novasPosicoes, novasTransacoes, mapaTickerParaId) =>
