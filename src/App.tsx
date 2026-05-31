@@ -7,7 +7,7 @@ import { Transacoes } from './pages/Transacoes'
 
 export function App() {
   return (
-    <BrowserRouter basename="/ponto-digital">
+    <BrowserRouter basename="/carteira-digital">
 
       <Routes>
         <Route element={<Layout />}>
