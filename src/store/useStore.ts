@@ -18,6 +18,12 @@ interface Store {
   adicionarTransacao: (dados: Omit<Transacao, 'id' | 'criadaEm'>) => void
   editarTransacao: (id: string, dados: Partial<Omit<Transacao, 'id' | 'criadaEm'>>) => void
   removerTransacao: (id: string) => void
+
+  importarEmMassa: (
+    novasPosicoes: Omit<Posicao, 'id' | 'criadaEm' | 'atualizadaEm'>[],
+    novasTransacoes: Omit<Transacao, 'id' | 'criadaEm'>[],
+    mapaTickerParaId: Record<string, string>
+  ) => void
 }
 
 function gerarId(): string {
@@ -94,6 +100,26 @@ export const useStore = create<Store>()(
         set((s) => ({
           transacoes: s.transacoes.filter((t) => t.id !== id),
         })),
+
+      importarEmMassa: (novasPosicoes, novasTransacoes, mapaTickerParaId) =>
+        set((s) => {
+          const agora = new Date().toISOString()
+          const posicoesCriadas = novasPosicoes.map((p) => ({
+            ...p,
+            id: mapaTickerParaId[p.ticker],
+            criadaEm: agora,
+            atualizadaEm: agora,
+          }))
+          const transacoesCriadas = novasTransacoes.map((t) => ({
+            ...t,
+            id: gerarId(),
+            criadaEm: agora,
+          }))
+          return {
+            posicoes:   [...s.posicoes, ...posicoesCriadas],
+            transacoes: [...s.transacoes, ...transacoesCriadas],
+          }
+        }),
     }),
     { name: 'carteira-digital-v1' }
   )
