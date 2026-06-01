@@ -6,7 +6,7 @@ import { Importar }    from './pages/Importar'
 
 export function App() {
   return (
-    <BrowserRouter basename="/carteira-digital">
+    <BrowserRouter basename="/Carteira-Digital">
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Consolidado />} />
